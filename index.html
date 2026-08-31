@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Missões-Aranha do João</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1b3aa5">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#e12228;
+    --red-deep:#a3161b;
+    --blue:#1b3aa5;
+    --blue-deep:#102674;
+    --panel:#fff6f3;
+    --panel-dark:#f2ddd9;
+    --gold:#ffd23f;
+    --gold-deep:#d9a600;
+    --ink:#211018;
+    --green:#2fa15a;
+    --radius:16px;
+    --shadow: 0 6px 0 rgba(0,0,0,0.22);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    font-family:'Nunito',sans-serif;
+    color:var(--ink);
+    background:
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 26px),
+      repeating-linear-gradient(-45deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 26px),
+      radial-gradient(circle at 50% 0%, var(--blue) 0%, var(--blue-deep) 70%);
+    padding: 20px 14px 60px;
+  }
+  .wrap{max-width:520px;margin:0 auto;}
+
+  h1,h2,h3{font-family:'Bangers',cursive;margin:0;letter-spacing:1px;}
+
+  /* header */
+  .header{
+    text-align:center;
+    padding: 10px 6px 22px;
+  }
+  .header .flag{font-size:42px;display:block;margin-bottom:4px;}
+  .header h1{
+    color:var(--gold);
+    font-size:32px;
+    -webkit-text-stroke: 2px var(--red-deep);
+    text-shadow: 3px 3px 0 var(--red-deep);
+  }
+  .header p{
+    color:#fff;
+    font-family:'Nunito',sans-serif;
+    font-weight:800;
+    font-size:14px;
+    margin-top:8px;
+  }
+  .web-divider{
+    height:4px;
+    margin: 16px auto 0;
+    max-width:380px;
+    background:repeating-linear-gradient(90deg, var(--gold) 0 10px, transparent 10px 20px);
+    border-radius:4px;
+  }
+
+  /* card base */
+  .card{
+    background:var(--panel);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:16px;
+    margin-bottom:16px;
+    border:3px solid var(--red);
+  }
+
+  /* day tabs */
+  .days{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    padding-bottom:4px;
+    margin-bottom:14px;
+    scrollbar-width:none;
+  }
+  .days::-webkit-scrollbar{display:none;}
+  .day-btn{
+    flex:0 0 auto;
+    padding:9px 13px;
+    border-radius:10px;
+    border:none;
+    background:var(--red-deep);
+    color:#fff;
+    font-family:'Bangers',cursive;
+    letter-spacing:0.5px;
+    font-size:14px;
+    cursor:pointer;
+    box-shadow:0 3px 0 rgba(0,0,0,0.35);
+    transition:transform .15s ease, background .15s ease;
+  }
+  .day-btn:active{transform:scale(0.94);}
+  .day-btn.active{
+    background:var(--gold);
+    color:var(--red-deep);
+    box-shadow:0 3px 0 var(--gold-deep);
+  }
+  .day-btn .dot{
+    display:inline-block;
+    width:7px;height:7px;border-radius:50%;
+    background:var(--green);
+    margin-left:6px;
+    vertical-align:middle;
+    opacity:0;
+  }
+  .day-btn.done .dot{opacity:1;}
+
+  /* total banner */
+  .total-banner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--red);
+    border-radius:var(--radius);
+    padding:14px 18px;
+    margin-bottom:16px;
+    box-shadow:0 6px 0 var(--red-deep);
+    border:3px solid var(--gold);
+  }
+  .total-banner .label{
+    font-family:'Bangers',cursive;
+    font-size:13px;
+    color:#ffe9a8;
+    letter-spacing:0.5px;
+  }
+  .total-banner .amount{
+    font-family:'Bangers',cursive;
+    font-size:28px;
+    color:#fff;
+    margin-top:2px;
+  }
+  .total-banner .coin-icon{font-size:34px;}
+
+  /* task list */
+  .task{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:11px 6px;
+    border-bottom:2px dashed var(--panel-dark);
+  }
+  .task:last-child{border-bottom:none;}
+  .task .icon{font-size:26px;width:34px;text-align:center;}
+  .task .info{flex:1;}
+  .task .name{font-weight:800;font-size:15.5px;color:var(--ink);}
+  .task .value{font-size:12.5px;color:var(--blue);font-weight:700;}
+  .coin-toggle{
+    width:44px;height:44px;
+    border-radius:50%;
+    border:3px solid var(--gold-deep);
+    background:radial-gradient(circle at 35% 30%, #fff6d8, var(--gold) 70%);
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:transform .18s ease;
+  }
+  .coin-toggle.unchecked{
+    background:rgba(0,0,0,0.06);
+    border-color:rgba(0,0,0,0.15);
+    color:transparent;
+  }
+  .coin-toggle.pop{animation:pop .35s ease;}
+  @keyframes pop{
+    0%{transform:scale(1);}
+    45%{transform:scale(1.35) rotate(10deg);}
+    100%{transform:scale(1);}
+  }
+
+  /* chests */
+  .chests-title{
+    color:var(--gold);
+    text-align:center;
+    font-size:24px;
+    margin: 26px 0 14px;
+    text-shadow: 2px 2px 0 var(--red-deep);
+  }
+  .chest-card{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:12px;
+  }
+  .chest-card .chest-icon{
+    font-size:32px;
+    width:50px;height:50px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--panel-dark);
+    border-radius:12px;
+    flex-shrink:0;
+    box-shadow:0 3px 0 rgba(0,0,0,0.15);
+  }
+  .chest-card .chest-body{flex:1;}
+  .chest-card .chest-head{
+    display:flex;justify-content:space-between;align-items:baseline;
+    margin-bottom:5px;
+  }
+  .chest-card .chest-name{font-family:'Bangers',cursive;font-size:16px;letter-spacing:0.5px;color:var(--red-deep);}
+  .chest-card .chest-amount{font-family:'Bangers',cursive;font-size:15px;color:var(--blue);}
+  .bar-track{
+    background:var(--panel-dark);
+    border-radius:20px;
+    height:12px;
+    overflow:hidden;
+  }
+  .bar-fill{
+    height:100%;
+    border-radius:20px;
+    transition:width .5s ease;
+  }
+  .goal-note{font-size:11.5px;color:#7a4a45;margin-top:5px;}
+
+  /* split controls */
+  .split-row{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+  }
+  .split-item{
+    flex:1;
+    text-align:center;
+    background:var(--panel-dark);
+    border-radius:10px;
+    padding:7px 4px;
+  }
+  .split-item label{display:block;font-size:11px;font-weight:700;color:#7a4a45;margin-bottom:3px;}
+  .split-item input{
+    width:100%;
+    text-align:center;
+    border:none;
+    background:transparent;
+    font-family:'Bangers',cursive;
+    font-size:16px;
+    color:var(--ink);
+  }
+  .split-warning{
+    font-size:11.5px;
+    color:var(--red);
+    font-weight:700;
+    text-align:center;
+    margin-top:6px;
+    min-height:14px;
+  }
+
+  /* end week button */
+  .end-week-btn{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:12px;
+    background:var(--blue);
+    color:#fff;
+    font-family:'Bangers',cursive;
+    letter-spacing:0.5px;
+    font-size:18px;
+    cursor:pointer;
+    box-shadow:0 5px 0 var(--blue-deep);
+    margin-top:10px;
+  }
+  .end-week-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--blue-deep);}
+  .end-week-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+  .footer-note{
+    text-align:center;
+    color:rgba(255,255,255,0.75);
+    font-size:12px;
+    margin-top:18px;
+    line-height:1.5;
+  }
+
+  /* celebration overlay */
+  .celebrate{
+    position:fixed;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(16,38,116,0.8);
+    z-index:50;
+    opacity:0;pointer-events:none;
+    transition:opacity .25s ease;
+  }
+  .celebrate.show{opacity:1;pointer-events:auto;}
+  .celebrate-box{
+    background:var(--panel);
+    border-radius:18px;
+    padding:30px 26px;
+    text-align:center;
+    max-width:320px;
+    box-shadow:0 10px 0 var(--red-deep);
+    border:3px solid var(--gold);
+    transform:scale(0.85);
+    transition:transform .25s ease;
+  }
+  .celebrate.show .celebrate-box{transform:scale(1);}
+  .celebrate-box .big-emoji{font-size:52px;display:block;margin-bottom:10px;}
+  .celebrate-box h3{font-size:24px;margin-bottom:10px;color:var(--red-deep);}
+  .celebrate-box p{font-size:14px;color:#5c3a35;margin:0 0 18px;font-family:'Nunito',sans-serif;font-weight:700;}
+  .celebrate-box button{
+    padding:12px 22px;
+    border:none;
+    border-radius:10px;
+    background:var(--blue);
+    color:#fff;
+    font-family:'Bangers',cursive;
+    font-size:15px;
+    letter-spacing:0.5px;
+    cursor:pointer;
+    box-shadow:0 4px 0 var(--blue-deep);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <span class="flag">🕷️</span>
+    <h1>Missões-Aranha do João</h1>
+    <p>Cumpre as missões, ganha moedas!</p>
+    <div class="web-divider"></div>
+  </div>
+
+  <div class="days" id="dayTabs"></div>
+
+  <div class="total-banner">
+    <div>
+      <div class="label">Moedas desta semana</div>
+      <div class="amount" id="weekTotal">0,00 €</div>
+    </div>
+    <div class="coin-icon">🪙</div>
+  </div>
+
+  <div class="card">
+    <div id="taskList"></div>
+  </div>
+
+  <h2 class="chests-title">🕸️ Os Cofres do Herói</h2>
+
+  <div class="card">
+    <div class="chest-card">
+      <div class="chest-icon">🏰</div>
+      <div class="chest-body">
+        <div class="chest-head">
+          <span class="chest-name">Poupar</span>
+          <span class="chest-amount" id="amtSave">0,00 €</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" id="barSave" style="background:var(--blue);width:0%"></div></div>
+        <div class="goal-note" id="goalNote">Meta (40% do máximo semanal): <span id="goalAmt">0,00 €</span> — falta <span id="goalLeft">0,00 €</span></div>
+      </div>
+    </div>
+    <div class="chest-card">
+      <div class="chest-icon">🛒</div>
+      <div class="chest-body">
+        <div class="chest-head">
+          <span class="chest-name">Gastar</span>
+          <span class="chest-amount" id="amtSpend">0,00 €</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" id="barSpend" style="background:var(--gold-deep);width:0%"></div></div>
+      </div>
+    </div>
+    <div class="chest-card">
+      <div class="chest-icon">🎁</div>
+      <div class="chest-body">
+        <div class="chest-head">
+          <span class="chest-name">Ajudar</span>
+          <span class="chest-amount" id="amtGive">0,00 €</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" id="barGive" style="background:var(--red);width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="split-row">
+      <div class="split-item"><label>Poupar %</label><input type="number" id="splitSave" min="0" max="100"></div>
+      <div class="split-item"><label>Gastar %</label><input type="number" id="splitSpend" min="0" max="100"></div>
+      <div class="split-item"><label>Ajudar %</label><input type="number" id="splitGive" min="0" max="100"></div>
+    </div>
+    <div class="split-warning" id="splitWarning"></div>
+
+    <button class="end-week-btn" id="endWeekBtn">🏁 Fechar semana!</button>
+  </div>
+
+  <p class="footer-note">Marca uma moeda 🪙 sempre que terminares uma missão.<br>No fim da semana, carrega no botão para repartir as moedas pelos cofres — como no jogo do Dave Ramsey!</p>
+</div>
+
+<div class="celebrate" id="celebrate">
+  <div class="celebrate-box">
+    <span class="big-emoji">🕸️</span>
+    <h3>Missão cumprida!</h3>
+    <p id="celebrateText">As moedas foram repartidas pelos cofres. Boa sorte na próxima missão!</p>
+    <button id="celebrateClose">Vamos lá!</button>
+  </div>
+</div>
+
+<script>
+const DAYS = ["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
+const WEEKDAYS = ["Segunda","Terça","Quarta","Quinta","Sexta"];
+// freq: "daily" = todos os dias · "weekday" = só seg a sex
+const TASKS = [
+  {id:"cama",       name:"Fazer a cama",          value:0.10, icon:"🛏️", freq:"daily"},
+  {id:"pijama",     name:"Dobrar o pijama",        value:0.10, icon:"👕", freq:"daily"},
+  {id:"bring",      name:"Arrumar os brinquedos",  value:0.10, icon:"🧸", freq:"daily"},
+  {id:"mesa",       name:"Pôr a mesa",             value:0.25, icon:"🍽️", freq:"daily"},
+  {id:"sapatilhas", name:"Arrumar as sapatilhas",  value:0.10, icon:"👟", freq:"weekday"},
+];
+
+function maxWeeklyValue(){
+  let sum = 0;
+  TASKS.forEach(t=>{
+    if(t.freq==="daily") sum += t.value*7;
+    else if(t.freq==="weekday") sum += t.value*5;
+  });
+  return sum;
+}
+const SAVINGS_GOAL_RATIO = 0.40;
+
+let state = {
+  checks: {},                 // "day-taskId": true
+  chests: {save:0, spend:0, give:0},
+  split: {save:40, spend:40, give:20}
+};
+let currentDay = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay()-1];
+
+function euro(n){ return n.toLocaleString('pt-PT',{minimumFractionDigits:2, maximumFractionDigits:2}) + " €"; }
+
+// Nota: guardado com localStorage — funciona normalmente num site publicado ou numa app instalada,
+// mas não persiste na pré-visualização aqui dentro do Claude.
+async function loadState(){
+  try{
+    const raw = localStorage.getItem('manuel-tarefas-aranha-state');
+    if(raw){
+      const parsed = JSON.parse(raw);
+      state = Object.assign(state, parsed);
+    }
+  }catch(e){ console.error('Falha ao carregar', e); }
+}
+async function saveState(){
+  try{ localStorage.setItem('manuel-tarefas-aranha-state', JSON.stringify(state)); }
+  catch(e){ console.error('Falha ao guardar', e); }
+}
+
+function tasksForDay(day){
+  return TASKS.filter(t => t.freq==="daily" || (t.freq==="weekday" && WEEKDAYS.includes(day)));
+}
+
+function renderDayTabs(){
+  const el = document.getElementById('dayTabs');
+  el.innerHTML = '';
+  DAYS.forEach(day=>{
+    const visible = tasksForDay(day);
+    const doneCount = visible.filter(t => state.checks[day+'-'+t.id]).length;
+    const btn = document.createElement('button');
+    btn.className = 'day-btn' + (day===currentDay?' active':'') + (doneCount===visible.length?' done':'');
+    btn.innerHTML = day.slice(0,3) + '<span class="dot"></span>';
+    btn.onclick = ()=>{ currentDay = day; renderAll(); };
+    el.appendChild(btn);
+  });
+}
+
+function bindCoinToggle(btn, key){
+  btn.onclick = ()=>{
+    state.checks[key] = !state.checks[key];
+    btn.classList.add('pop');
+    setTimeout(()=>btn.classList.remove('pop'), 350);
+    btn.classList.toggle('unchecked', !state.checks[key]);
+    saveState();
+    renderTotals();
+    renderDayTabs();
+  };
+}
+
+function renderTasks(){
+  const el = document.getElementById('taskList');
+  el.innerHTML = '';
+  tasksForDay(currentDay).forEach(t=>{
+    const key = currentDay+'-'+t.id;
+    const checked = !!state.checks[key];
+    const row = document.createElement('div');
+    row.className = 'task';
+    row.innerHTML = `
+      <div class="icon">${t.icon}</div>
+      <div class="info">
+        <div class="name">${t.name}</div>
+        <div class="value">${euro(t.value)}</div>
+      </div>
+      <div class="coin-toggle ${checked?'':'unchecked'}" data-key="${key}">🪙</div>
+    `;
+    el.appendChild(row);
+  });
+  el.querySelectorAll('.coin-toggle').forEach(btn => bindCoinToggle(btn, btn.dataset.key));
+}
+
+function weekTotal(){
+  let sum = 0;
+  DAYS.forEach(day=>{
+    tasksForDay(day).forEach(t=>{
+      if(state.checks[day+'-'+t.id]) sum += t.value;
+    });
+  });
+  return sum;
+}
+
+function renderTotals(){
+  document.getElementById('weekTotal').textContent = euro(weekTotal());
+  document.getElementById('amtSave').textContent = euro(state.chests.save);
+  document.getElementById('amtSpend').textContent = euro(state.chests.spend);
+  document.getElementById('amtGive').textContent = euro(state.chests.give);
+
+  const goal = maxWeeklyValue() * SAVINGS_GOAL_RATIO;
+  const pct = Math.min(100, (state.chests.save/goal)*100 || 0);
+  document.getElementById('barSave').style.width = pct+'%';
+  document.getElementById('goalAmt').textContent = euro(goal);
+  document.getElementById('goalLeft').textContent = euro(Math.max(0, goal - state.chests.save));
+
+  const maxOther = Math.max(state.chests.spend, state.chests.give, 1);
+  document.getElementById('barSpend').style.width = Math.min(100,(state.chests.spend/maxOther)*100)+'%';
+  document.getElementById('barGive').style.width = Math.min(100,(state.chests.give/maxOther)*100)+'%';
+
+  document.getElementById('splitSave').value = state.split.save;
+  document.getElementById('splitSpend').value = state.split.spend;
+  document.getElementById('splitGive').value = state.split.give;
+  validateSplit();
+}
+
+function validateSplit(){
+  const total = Number(state.split.save)+Number(state.split.spend)+Number(state.split.give);
+  const warn = document.getElementById('splitWarning');
+  const btn = document.getElementById('endWeekBtn');
+  if(total !== 100){
+    warn.textContent = `As percentagens somam ${total}% — devem somar 100%`;
+    btn.disabled = true;
+  } else {
+    warn.textContent = '';
+    btn.disabled = weekTotal() <= 0;
+  }
+}
+
+['splitSave','splitSpend','splitGive'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', (e)=>{
+    const key = id.replace('split','').toLowerCase();
+    state.split[key] = Number(e.target.value)||0;
+    validateSplit();
+    saveState();
+  });
+});
+
+document.getElementById('endWeekBtn').onclick = ()=>{
+  const total = weekTotal();
+  if(total<=0) return;
+  state.chests.save += total * (state.split.save/100);
+  state.chests.spend += total * (state.split.spend/100);
+  state.chests.give += total * (state.split.give/100);
+  state.checks = {};
+  saveState();
+
+  const reachedGoal = state.chests.save >= (maxWeeklyValue() * SAVINGS_GOAL_RATIO);
+  document.getElementById('celebrateText').textContent = reachedGoal
+    ? `Repartiste ${euro(total)}! E já atingiste a meta do cofre Poupar! 🎉`
+    : `Repartiste ${euro(total)} pelos três cofres. Nova semana, novas missões!`;
+  document.getElementById('celebrate').classList.add('show');
+  renderAll();
+};
+document.getElementById('celebrateClose').onclick = ()=>{
+  document.getElementById('celebrate').classList.remove('show');
+};
+
+function renderAll(){
+  renderDayTabs();
+  renderTasks();
+  renderTotals();
+}
+
+(async function init(){
+  await loadState();
+  renderAll();
+})();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  });
+}
+
+</script>
+</body>
+</html>
